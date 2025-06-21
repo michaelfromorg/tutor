@@ -204,3 +204,161 @@ body {
 	color: #555;
 	border-left: 2px solid #cbd5e0;
 }
+
+/* Homework Modal Styling */
+.homework-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(4px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	animation: fadeIn 0.2s ease-out;
+}
+
+.homework-modal {
+	background: white;
+	border-radius: 12px;
+	padding: 32px;
+	width: 90%;
+	max-width: 500px;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+	animation: slideIn 0.3s ease-out;
+}
+
+.homework-modal h2 {
+	margin: 0 0 20px 0;
+	font-size: 24px;
+	font-weight: 700;
+	color: #333;
+	text-align: center;
+}
+
+.homework-modal textarea {
+	width: 100%;
+	min-height: 120px;
+	padding: 16px;
+	border: 2px solid #e1e5e9;
+	border-radius: 8px;
+	font-family: 'Inter', sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	resize: vertical;
+	transition: border-color 0.2s;
+	box-sizing: border-box;
+}
+
+.homework-modal textarea:focus {
+	outline: none;
+	border-color: hsl(214, 84%, 56%);
+	box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.homework-modal-buttons {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+	margin-top: 24px;
+}
+
+.homework-modal-buttons button {
+	padding: 12px 24px;
+	font-size: 14px;
+	font-weight: 600;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-family: 'Inter', sans-serif;
+}
+
+.cancel-button {
+	background: #f5f5f5;
+	color: #666;
+	border: 1px solid #ddd;
+}
+
+.cancel-button:hover {
+	background: #eeeeee;
+	color: #555;
+}
+
+.submit-button {
+	background: hsl(214, 84%, 56%);
+	color: white;
+	border: none;
+}
+
+.submit-button:hover:not(:disabled) {
+	background: hsl(214, 84%, 50%);
+	transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+	background: #ccc;
+	cursor: not-allowed;
+}
+
+/* Homework Question Panel */
+.homework-question-panel {
+	position: absolute;
+	top: 60px;
+	left: 16px;
+	background: white;
+	border: 1px solid #e1e5e9;
+	border-radius: 8px;
+	padding: 16px 20px;
+	max-width: 400px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	z-index: 100;
+	animation: slideDown 0.3s ease-out;
+}
+
+.homework-question-panel h3 {
+	margin: 0 0 12px 0;
+	font-size: 14px;
+	font-weight: 700;
+	color: hsl(214, 84%, 56%);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.homework-question-panel p {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #444;
+}
+
+/* Animations */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-20px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
