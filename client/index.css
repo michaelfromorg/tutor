@@ -80,3 +80,125 @@ body {
 	border-radius: 2px;
 	cursor: pointer;
 }
+
+/* Chat log styling */
+.chat-log {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+/* Message bubbles */
+.bubble {
+	max-width: 85%;
+	padding: 12px 16px;
+	border-radius: 18px;
+	word-wrap: break-word;
+	line-height: 1.4;
+}
+
+.bubble.user {
+	align-self: flex-end;
+	background: hsl(214, 84%, 56%);
+	color: white;
+	border-bottom-right-radius: 4px;
+}
+
+.bubble.assistant {
+	align-self: flex-start;
+	background: white;
+	border: 1px solid #e1e5e9;
+	border-bottom-left-radius: 4px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.bubble p {
+	margin: 0;
+	font-size: 14px;
+}
+
+.bubble.user p {
+	font-weight: 500;
+}
+
+/* Details styling for AI responses */
+.bubble.assistant details {
+	margin-top: 12px;
+	border-top: 1px solid #f0f0f0;
+	padding-top: 12px;
+}
+
+.bubble.assistant details summary {
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 13px;
+	color: #666;
+	padding: 4px 0;
+	user-select: none;
+}
+
+.bubble.assistant details summary:hover {
+	color: hsl(214, 84%, 56%);
+}
+
+.bubble.assistant details[open] summary {
+	margin-bottom: 8px;
+	color: hsl(214, 84%, 56%);
+}
+
+.strategy-section {
+	background: #f8f9fa;
+	border-radius: 8px;
+	padding: 10px 12px;
+	margin: 8px 0;
+	border-left: 3px solid hsl(214, 84%, 56%);
+}
+
+.strategy-section strong {
+	color: hsl(214, 84%, 56%);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-weight: 700;
+}
+
+.strategy-section p {
+	margin: 4px 0 0 0;
+	font-size: 13px;
+	color: #444;
+}
+
+.intents-section {
+	margin-top: 12px;
+}
+
+.intents-section strong {
+	color: #666;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-weight: 700;
+	display: block;
+	margin-bottom: 6px;
+}
+
+.intents-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.intent-item {
+	background: #f0f4f8;
+	padding: 8px 10px;
+	border-radius: 6px;
+	font-size: 13px;
+	color: #555;
+	border-left: 2px solid #cbd5e0;
+}

@@ -153,18 +153,22 @@ function ChatSidebar({ editor, messages, setMessages }: { editor: Editor; messag
 						<p>{m.content}</p>
 						{m.role === 'assistant' && (m.strategy || (m.intents && m.intents.length > 0)) && (
 							<details>
-								<summary>Details</summary>
+								<summary>AI Strategy & Actions</summary>
 								{m.strategy && (
-									<p>
-										<strong>Strategy:</strong> {m.strategy}
-								</p>
+									<div className="strategy-section">
+										<strong>Strategy</strong>
+										<p>{m.strategy}</p>
+									</div>
 								)}
 								{m.intents && m.intents.length > 0 && (
-									<ul>
-										{m.intents.map((intent, i) => (
-											<li key={i}>{intent}</li>
-										))}
-									</ul>
+									<div className="intents-section">
+										<strong>Actions Taken</strong>
+										<ul className="intents-list">
+											{m.intents.map((intent, i) => (
+												<li key={i} className="intent-item">{intent}</li>
+											))}
+										</ul>
+									</div>
 								)}
 							</details>
 						)}
