@@ -13,3 +13,15 @@ The large language model can...
 - Provide you hints
 - Draw pictures to help you visualize the problem
 - Correct your mistakes
+
+## Notes for judges
+
+- Relies on a mix of an infinite canvas and chat UI (that can interact with the canvas!)
+- Entirely vibe-coded, mostly from 1pm; using Windsurf with a mix of o3, sonnet-3.7, and sonnet-4
+- Persist user questions to local storage, and remembers past chats for prompt re-use
+- Basic visuals that match the tldraw style
+
+Future ideas...
+
+- Students upload their homework PDF, and it's immediately broken into a series of question pages
+- AI nudges students towards the correct answer as they work, catches mistakes as you go (instead of chat -- chat should be secondary)
