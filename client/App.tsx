@@ -1,10 +1,19 @@
-import { FormEventHandler, useCallback, useEffect, useRef, useState } from 'react'
+import { FormEventHandler, useCallback, useEffect, useRef, useState, Dispatch, SetStateAction } from 'react'
 import { DefaultSpinner, Editor, Tldraw } from 'tldraw'
-import { useTldrawAiExample } from './useTldrawAiExample'
+import { useTldrawAiExample, onAiThinking } from './useTldrawAiExample'
+
+type Message = {
+	id: string
+	role: 'user' | 'assistant'
+	content: string
+	strategy?: string
+	intents?: string[]
+}
 
 function App() {
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [isChatOpen, setIsChatOpen] = useState(true)
+	const [messages, setMessages] = useState<Message[]>([])
 	const SIDEBAR_WIDTH = 260
 
 	const toggleChat = useCallback(() => setIsChatOpen((v) => !v), [])
@@ -32,7 +41,9 @@ function App() {
 			style={{ gridTemplateColumns: isChatOpen ? `1fr ${SIDEBAR_WIDTH}px` : '1fr' }}
 		>
 			<Tldraw persistenceKey="tldraw-ai-demo-2" onMount={setEditor} />
-			{editor && isChatOpen && <ChatSidebar editor={editor} />}
+			{editor && isChatOpen && (
+				<ChatSidebar editor={editor} messages={messages} setMessages={setMessages} />
+			)}
 
 			{/* Toggle button */}
 			<button className="chat-toggle" onClick={toggleChat}>
@@ -42,8 +53,9 @@ function App() {
 	)
 }
 
-function InputBar({ editor }: { editor: Editor }) {
+function InputBar({ editor, setMessages }: { editor: Editor; setMessages: Dispatch<SetStateAction<Message[]>> }) {
 	const ai = useTldrawAiExample(editor)
+	const nanoid = () => Math.random().toString(36).slice(2, 9)
 
 	// The state of the prompt input, either idle or loading with a cancel callback
 	const [isGenerating, setIsGenerating] = useState(false)
@@ -62,7 +74,6 @@ function InputBar({ editor }: { editor: Editor }) {
 		async (e) => {
 			e.preventDefault()
 
-			// If we have a stashed cancel function, call it and stop here
 			if (rCancelFn.current) {
 				rCancelFn.current()
 				rCancelFn.current = null
@@ -70,32 +81,52 @@ function InputBar({ editor }: { editor: Editor }) {
 				return
 			}
 
+			const formData = new FormData(e.currentTarget)
+			const value = formData.get('input') as string
+
+			// push user message
+			const userMsg: Message = { id: nanoid(), role: 'user', content: value }
+			setMessages((msgs: Message[]) => [...msgs, userMsg])
+
+			// provisional assistant message
+			const assistId = nanoid()
+			setMessages((msgs: Message[]) => [...msgs, { id: assistId, role: 'assistant', content: 'Thinking…', strategy: '', intents: [] }])
+
 			try {
-				const formData = new FormData(e.currentTarget)
-				const value = formData.get('input') as string
-
-				// We call the ai module with the value from the input field and get back a promise and a cancel function
-				const { promise, cancel } = ai.prompt({ message: value, stream: true })
-
-				// Stash the cancel function so we can call it if the user clicks the button again
+				const { promise, cancel } = ai.prompt({ message: value, stream: true }) as any
 				rCancelFn.current = cancel
 
-				// Set the state to loading
+                let firstChunk = true
+                const unsubscribe = onAiThinking((change: any) => {
+                    const desc = (change as any).description ?? ''
+                    if (!desc) return
+                    setMessages((prev) =>
+                        prev.map((m) => {
+                            if (m.id !== assistId) return m
+                            if (firstChunk) {
+                                firstChunk = false
+                                return { ...m, strategy: desc }
+                            }
+                            return { ...m, intents: [...(m.intents ?? []), desc] }
+                        })
+                    )
+                })
 				setIsGenerating(true)
 
-				// ...wait for the promise to resolve
 				await promise
 
-				// ...then set the state back to idle
 				setIsGenerating(false)
 				rCancelFn.current = null
-			} catch (e: any) {
-				console.error(e)
+
+				setMessages((msgs: Message[]) =>
+					msgs.map((msg: Message) => (msg.id === assistId ? { ...msg, content: 'Done ✅' } : msg))
+				)
+			} catch (err) {
+				console.error(err)
 				setIsGenerating(false)
 				rCancelFn.current = null
 			}
-		},
-		[]
+		}, [ai, setMessages]
 	)
 
 	return (
@@ -108,10 +139,40 @@ function InputBar({ editor }: { editor: Editor }) {
 	)
 }
 
-function ChatSidebar({ editor }: { editor: Editor }) {
+function ChatSidebar({ editor, messages, setMessages }: { editor: Editor; messages: Message[]; setMessages: Dispatch<SetStateAction<Message[]>> }) {
+	const endRef = useRef<HTMLDivElement>(null)
+	useEffect(() => {
+		endRef.current?.scrollIntoView({ behavior: 'smooth' })
+	}, [messages])
+
 	return (
 		<div className="chat-sidebar">
-			<InputBar editor={editor} />
+			<div className="chat-log">
+				{messages.map((m) => (
+					<div key={m.id} className={`bubble ${m.role}`}>
+						<p>{m.content}</p>
+						{m.role === 'assistant' && (m.strategy || (m.intents && m.intents.length > 0)) && (
+							<details>
+								<summary>Details</summary>
+								{m.strategy && (
+									<p>
+										<strong>Strategy:</strong> {m.strategy}
+								</p>
+								)}
+								{m.intents && m.intents.length > 0 && (
+									<ul>
+										{m.intents.map((intent, i) => (
+											<li key={i}>{intent}</li>
+										))}
+									</ul>
+								)}
+							</details>
+						)}
+					</div>
+				))}
+				<div ref={endRef} />
+			</div>
+			<InputBar editor={editor} setMessages={setMessages} />
 		</div>
 	)
 }

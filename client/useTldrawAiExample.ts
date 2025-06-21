@@ -9,6 +9,13 @@ import { SimpleIds } from './transforms/SimpleIds'
  *
  * @param editor - (optional) The editor instance to use. If not provided, the hook will try to use the editor from React context.
  */
+// Thinking listeners so UI can react to streaming changes
+export type ThinkingListener = (change: TLAiChange) => void
+const thinkingListeners: ThinkingListener[] = []
+export function onAiThinking(fn: ThinkingListener) {
+	thinkingListeners.push(fn)
+}
+
 export function useTldrawAiExample(editor?: Editor) {
 	return useTldrawAi({ editor, ...STATIC_TLDRAWAI_OPTIONS })
 }
@@ -68,7 +75,8 @@ const STATIC_TLDRAWAI_OPTIONS: TldrawAiOptions = {
 					if (match) {
 						try {
 							const change: TLAiChange = JSON.parse(match[1])
-							yield change
+							thinkingListeners.forEach((fn) => fn(change));
+						yield change
 						} catch (err) {
 							console.error(err)
 							throw Error(`JSON parsing error: ${match[1]}`)
