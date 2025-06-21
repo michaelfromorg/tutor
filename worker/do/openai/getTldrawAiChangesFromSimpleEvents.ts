@@ -25,10 +25,17 @@ import {
 	ISimpleMoveEvent,
 } from './schema'
 
+// Helper function to ensure shape IDs start with "shape:"
+function ensureShapeId(id: string): string {
+	return id.startsWith('shape:') ? id : `shape:${id}`
+}
+
 export function getTldrawAiChangesFromSimpleEvents(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleEvent
 ) {
+	console.log('Processing event:', JSON.stringify(event, null, 2));
+	
 	switch (event.type) {
 		case 'update':
 		case 'create': {
@@ -44,7 +51,9 @@ export function getTldrawAiChangesFromSimpleEvents(
 			return []
 		}
 		default: {
-			throw exhaustiveSwitchError(event, 'type')
+			console.error('Unknown event type:', event.type, 'Full event:', JSON.stringify(event, null, 2));
+			// Instead of throwing an error, return an empty array to continue processing
+			return []
 		}
 	}
 }
@@ -77,7 +86,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
-					id: shape.shapeId as any,
+					id: ensureShapeId(shape.shapeId as any),
 					type: 'text',
 					x: shape.x,
 					y: shape.y,
@@ -98,7 +107,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
-					id: shape.shapeId as any,
+					id: ensureShapeId(shape.shapeId as any),
 					type: 'line',
 					x: minX,
 					y: minY,
@@ -131,7 +140,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
-					id: shapeId as any,
+					id: ensureShapeId(shapeId as any),
 					type: 'arrow',
 					x: 0,
 					y: 0,
@@ -146,7 +155,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 
 			if (shapeEventType === 'updateShape') {
 				// Updating bindings is complicated, it's easier to just delete all bindings and recreate them
-				for (const binding of prompt.canvasContent.bindings.filter((b) => b.fromId === 'shapeId')) {
+				for (const binding of prompt.canvasContent.bindings.filter((b) => b.fromId === ensureShapeId(shapeId))) {
 					changes.push({
 						type: 'deleteBinding',
 						description: 'cleaning up old bindings',
@@ -156,7 +165,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 			}
 
 			// Does the arrow have a start shape? Then try to create the binding
-			const startShape = fromId ? prompt.canvasContent.shapes.find((s) => s.id === fromId) : null
+			const startShape = fromId ? prompt.canvasContent.shapes.find((s) => s.id === ensureShapeId(fromId)) : null
 
 			if (startShape) {
 				changes.push({
@@ -164,8 +173,8 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 					description: shape.note ?? '',
 					binding: {
 						type: 'arrow',
-						fromId: shapeId as any,
-						toId: startShape.id,
+						fromId: ensureShapeId(shapeId as any),
+						toId: ensureShapeId(startShape.id),
 						props: {
 							normalizedAnchor: { x: 0.5, y: 0.5 },
 							isExact: false,
@@ -179,7 +188,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 
 			// Does the arrow have an end shape? Then try to create the binding
 
-			const endShape = toId ? prompt.canvasContent.shapes.find((s) => s.id === toId) : null
+			const endShape = toId ? prompt.canvasContent.shapes.find((s) => s.id === ensureShapeId(toId)) : null
 
 			if (endShape) {
 				changes.push({
@@ -187,8 +196,8 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 					description: shape.note ?? '',
 					binding: {
 						type: 'arrow',
-						fromId: shapeId as any,
-						toId: endShape.id,
+						fromId: ensureShapeId(shapeId as any),
+						toId: ensureShapeId(endShape.id),
 						props: {
 							normalizedAnchor: { x: 0.5, y: 0.5 },
 							isExact: false,
@@ -208,7 +217,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
-					id: shape.shapeId as any,
+					id: ensureShapeId(shape.shapeId as any),
 					type: 'geo',
 					x: shape.x,
 					y: shape.y,
@@ -230,7 +239,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
-					id: shape.shapeId as any,
+					id: ensureShapeId(shape.shapeId as any),
 					type: 'note',
 					x: shape.x,
 					y: shape.y,
@@ -246,7 +255,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 		case 'unknown': {
 			// shouldn't really appear here...
 
-			const originalShape = prompt.canvasContent.shapes.find((s) => s.id === shape.shapeId)
+			const originalShape = prompt.canvasContent.shapes.find((s) => s.id === ensureShapeId(shape.shapeId))
 			if (!originalShape) break
 
 			changes.push({
@@ -281,7 +290,7 @@ function getTldrawAiChangesFromSimpleDeleteEvent(
 		{
 			type: 'deleteShape',
 			description: intent ?? '',
-			shapeId: shapeId as any,
+			shapeId: ensureShapeId(shapeId as any),
 		},
 	]
 }
@@ -296,7 +305,7 @@ function getTldrawAiChangesFromSimpleMoveEvent(
 			type: 'updateShape',
 			description: intent ?? '',
 			shape: {
-				id: shapeId as any,
+				id: ensureShapeId(shapeId as any),
 				x: event.x,
 				y: event.y,
 			},
