@@ -14,6 +14,14 @@ export type ThinkingListener = (change: TLAiChange) => void
 const thinkingListeners: ThinkingListener[] = []
 export function onAiThinking(fn: ThinkingListener) {
 	thinkingListeners.push(fn)
+	
+	// Return unsubscribe function
+	return () => {
+		const index = thinkingListeners.indexOf(fn)
+		if (index > -1) {
+			thinkingListeners.splice(index, 1)
+		}
+	}
 }
 
 export function useTldrawAiExample(editor?: Editor) {

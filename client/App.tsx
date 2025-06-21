@@ -92,12 +92,14 @@ function InputBar({ editor, setMessages }: { editor: Editor; setMessages: Dispat
 			const assistId = nanoid()
 			setMessages((msgs: Message[]) => [...msgs, { id: assistId, role: 'assistant', content: 'Thinking…', strategy: '', intents: [] }])
 
+			let unsubscribe: (ReturnType<typeof onAiThinking> | null) = null
+
 			try {
 				const { promise, cancel } = ai.prompt({ message: value, stream: true }) as any
 				rCancelFn.current = cancel
 
                 let firstChunk = true
-                const unsubscribe = onAiThinking((change: any) => {
+                unsubscribe = onAiThinking((change: any) => {
                     const desc = (change as any).description ?? ''
                     if (!desc) return
                     setMessages((prev) =>
@@ -117,6 +119,7 @@ function InputBar({ editor, setMessages }: { editor: Editor; setMessages: Dispat
 
 				setIsGenerating(false)
 				rCancelFn.current = null
+				unsubscribe?.()
 
 				setMessages((msgs: Message[]) =>
 					msgs.map((msg: Message) => (msg.id === assistId ? { ...msg, content: 'Done ✅' } : msg))
@@ -125,6 +128,7 @@ function InputBar({ editor, setMessages }: { editor: Editor; setMessages: Dispat
 				console.error(err)
 				setIsGenerating(false)
 				rCancelFn.current = null
+				unsubscribe?.()
 			}
 		}, [ai, setMessages]
 	)
