@@ -4,6 +4,12 @@ import { useTldrawAiExample } from './useTldrawAiExample'
 
 function App() {
 	const [editor, setEditor] = useState<Editor | null>(null) // [1]
+
+	useEffect(() => {
+		if (!editor) return
+		editor.updateInstanceState({ isGridMode: true })
+	}, [editor])
+
 	return (
 		<div className="tldraw-ai-container">
 			<Tldraw persistenceKey="tldraw-ai-demo-2" onMount={setEditor} />
