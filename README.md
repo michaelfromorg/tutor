@@ -1,5 +1,7 @@
 # Tutor
 
+![A screenshot of the app.](./docs/tutor2.png)
+
 An experiment with AI and whiteboards.
 
 Tutor is an infinite canvas intended for students to complete homework problems. Each page is a question, and the AI is able to either chat or draw to help the student solve the problem.
