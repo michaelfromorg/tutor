@@ -10,7 +10,29 @@ body {
 	position: fixed;
 	inset: 0;
 	display: grid;
-	grid-template-rows: 1fr 48px;
+	grid-template-columns: 1fr 320px;
+}
+
+.chat-sidebar {
+	border-left: 1px solid #ddd;
+	background: #fafafa;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+}
+
+.chat-toggle {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	z-index: 200;
+	background: hsl(214, 84%, 56%);
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	padding: 6px 10px;
+	cursor: pointer;
 }
 
 /* Prompt input */
@@ -21,8 +43,9 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0px 8px;
+	padding: 8px;
 	z-index: 100;
+	margin-top: auto;
 }
 
 .prompt-input form {
@@ -34,8 +57,8 @@ body {
 }
 
 .prompt-input input[type='text'] {
-	width: 320px;
-	max-width: 100%;
+	flex: 1 1 auto;
+	min-width: 0;
 	height: 28px;
 	padding: 2px 8px;
 }

@@ -3,7 +3,23 @@ import { DefaultSpinner, Editor, Tldraw } from 'tldraw'
 import { useTldrawAiExample } from './useTldrawAiExample'
 
 function App() {
-	const [editor, setEditor] = useState<Editor | null>(null) // [1]
+	const [editor, setEditor] = useState<Editor | null>(null)
+	const [isChatOpen, setIsChatOpen] = useState(true)
+	const SIDEBAR_WIDTH = 260
+
+	const toggleChat = useCallback(() => setIsChatOpen((v) => !v), [])
+
+	// Toggle chat with Ctrl+\ or Cmd+\
+	useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === "\\") {
+				e.preventDefault()
+				toggleChat()
+			}
+		}
+		window.addEventListener('keydown', handler)
+		return () => window.removeEventListener('keydown', handler)
+	}, [toggleChat])
 
 	useEffect(() => {
 		if (!editor) return
@@ -11,9 +27,17 @@ function App() {
 	}, [editor])
 
 	return (
-		<div className="tldraw-ai-container">
+		<div
+			className="tldraw-ai-container"
+			style={{ gridTemplateColumns: isChatOpen ? `1fr ${SIDEBAR_WIDTH}px` : '1fr' }}
+		>
 			<Tldraw persistenceKey="tldraw-ai-demo-2" onMount={setEditor} />
-			{editor && <InputBar editor={editor} />}
+			{editor && isChatOpen && <ChatSidebar editor={editor} />}
+
+			{/* Toggle button */}
+			<button className="chat-toggle" onClick={toggleChat}>
+				{isChatOpen ? '✕' : '💬'}
+			</button>
 		</div>
 	)
 }
@@ -71,7 +95,7 @@ function InputBar({ editor }: { editor: Editor }) {
 				rCancelFn.current = null
 			}
 		},
-		[prompt]
+		[]
 	)
 
 	return (
@@ -80,6 +104,14 @@ function InputBar({ editor }: { editor: Editor }) {
 				<input name="input" type="text" autoComplete="off" placeholder="Enter your prompt…" />
 				<button>{isGenerating ? <DefaultSpinner /> : 'Send'}</button>
 			</form>
+		</div>
+	)
+}
+
+function ChatSidebar({ editor }: { editor: Editor }) {
+	return (
+		<div className="chat-sidebar">
+			<InputBar editor={editor} />
 		</div>
 	)
 }
